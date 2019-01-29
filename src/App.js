@@ -107,7 +107,7 @@ class App extends Component {
             value={searchTerm} 
             onChange={this.onSearchChange}
             onSubmit={this.onSearchSubmit}
-          >Search 
+          >Search
           </Search>
         </div>
         { error 
@@ -195,3 +195,9 @@ const Button = ({onClick, className = '', children}) => {
 }
 
 export default App;
+
+export {
+  Button,
+  Search,
+  Table,
+};
