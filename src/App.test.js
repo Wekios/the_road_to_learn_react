@@ -43,15 +43,19 @@ describe('Search', () => {
 });
 
 describe('Button', () => {
+  const props = {
+    onClick: function() {return 'works'},
+  };
+
   it('renders without crashing', () => {
     const div = document.createElement('div');
-    ReactDOM.render(<Button>Give Me More</Button>, div);
+    ReactDOM.render(<Button {...props}>Does this work?</Button>, div);
     ReactDOM.unmountComponentAtNode(div);
   });
 
   test('has a valid snapshot', () => {
     const component = renderer.create(
-      <Button>Give Me More</Button>
+      <Button {...props}>Does this work?</Button>
     );
     const tree = component.toJSON();
     expect(tree).toMatchSnapshot();
