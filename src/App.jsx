@@ -1,9 +1,10 @@
 import React, { Component } from "react";
 import axios from "axios";
 import PropTypes from "prop-types";
+import Search from "./components/Search";
 import "./App.css";
 
-const DEFAULT_QUERY = "redux";
+const DEFAULT_QUERY = "react";
 const DEFAULT_HPP = "100";
 const PATH_BASE = "https://hn.algolia.com/api/v1";
 const PATH_SEARCH = "/search";
@@ -14,6 +15,7 @@ const PARAM_HPP = "hitsPerPage=";
 // const url = `${PATH_BASE}${PATH_SEARCH}?${PARAM_SEARCH}${DEFAULT_QUERY}&${PARAM_PAGE}`;
 
 class App extends Component {
+  _isMounted = false;
   constructor(props) {
     super(props);
 
@@ -21,7 +23,8 @@ class App extends Component {
       results: null,
       searchKey: "",
       searchTerm: DEFAULT_QUERY,
-      error: null
+      error: null,
+      isLoading: false
     };
 
     this.needsToSearchTopStories = this.needsToSearchTopStories.bind(this);
@@ -49,11 +52,13 @@ class App extends Component {
       results: {
         ...results,
         [searchKey]: { hits: updatedHits, page }
-      }
+      },
+      isLoading: false
     });
   }
 
   fetchSearchTopStories(searchTerm, page = 0) {
+    this.setState({ isLoading: true });
     axios(
       `${PATH_BASE}${PATH_SEARCH}?${PARAM_SEARCH}${searchTerm}&${PARAM_PAGE}${page}&${PARAM_HPP}${DEFAULT_HPP}`
     )
@@ -82,9 +87,6 @@ class App extends Component {
 
     const isNotId = item => item.objectID !== id;
     const updatedHits = hits.filter(isNotId);
-    // Object Assign Way
-    // this.setState({ result: Object.assign({}, this.state.result, { hits: updatedHits }) });
-    // Object Spread Way
     this.setState({
       results: {
         ...results,
@@ -98,7 +100,7 @@ class App extends Component {
   }
 
   render() {
-    const { searchTerm, results, searchKey, error } = this.state;
+    const { searchTerm, results, searchKey, error, isLoading } = this.state;
     const page =
       (results && results[searchKey] && results[searchKey].page) || 0;
     const list =
@@ -122,32 +124,20 @@ class App extends Component {
           <Table list={list} onDismiss={this.onDismiss} />
         )}
         <div className="interactions">
-          <Button
-            onClick={() => this.fetchSearchTopStories(searchKey, page + 1)}
-          >
-            More
-          </Button>
+          {isLoading ? (
+            <Loading />
+          ) : (
+            <Button
+              onClick={() => this.fetchSearchTopStories(searchKey, page + 1)}
+            >
+              More
+            </Button>
+          )}
         </div>
       </div>
     );
   }
 }
-
-const Search = ({ value, onChange, onSubmit, children }) => {
-  return (
-    <form onSubmit={onSubmit}>
-      {children} <input type="text" value={value} onChange={onChange} />
-      <button type="submit">{children}</button>
-    </form>
-  );
-};
-
-Search.propTypes = {
-  value: PropTypes.string,
-  onChange: PropTypes.func,
-  onSubmit: PropTypes.func,
-  children: PropTypes.node.isRequired
-};
 
 const Table = ({ list, onDismiss }) => {
   const largeColumn = {
@@ -212,6 +202,8 @@ Button.propTypes = {
   className: PropTypes.string,
   children: PropTypes.node.isRequired
 };
+
+const Loading = () => <div>Loading...</div>;
 
 export default App;
 
