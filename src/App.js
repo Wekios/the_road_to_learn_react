@@ -14,6 +14,7 @@ const PARAM_HPP = 'hitsPerPage=';
 // const url = `${PATH_BASE}${PATH_SEARCH}?${PARAM_SEARCH}${DEFAULT_QUERY}&${PARAM_PAGE}`;
 
 class App extends Component {
+  _isMounted = false;
   constructor(props) {
     super(props);
 
@@ -31,7 +32,7 @@ class App extends Component {
     this.onSearchSubmit = this.onSearchSubmit.bind(this);
     this.onDismiss = this.onDismiss.bind(this);
   }
-  
+
   needsToSearchTopStories(searchTerm) {
     return !this.state.results[searchTerm];
   }
@@ -57,8 +58,8 @@ class App extends Component {
 
   fetchSearchTopStories(searchTerm, page = 0) {
     axios(`${PATH_BASE}${PATH_SEARCH}?${PARAM_SEARCH}${searchTerm}&${PARAM_PAGE}${page}&${PARAM_HPP}${DEFAULT_HPP}`)
-    .then(result => this.setSearchTopStories(result.data))
-    .catch(error => this.setState({ error }));
+      .then(result => this.setSearchTopStories(result.data))
+      .catch(error => this.setState({ error }));
   }
 
   componentDidMount() {
@@ -105,20 +106,20 @@ class App extends Component {
       <div className="page">
         <div className="interactions">
           <Search
-            value={searchTerm} 
+            value={searchTerm}
             onChange={this.onSearchChange}
             onSubmit={this.onSearchSubmit}
           >Search
           </Search>
         </div>
-        { error 
+        {error
           ? <div className="interactions">
-              <p>Something went wrong...</p>
-            </div>
-          : <Table 
+            <p>Something went wrong...</p>
+          </div>
+          : <Table
             list={list}
-            onDismiss={this.onDismiss} 
-            />
+            onDismiss={this.onDismiss}
+          />
         }
         <div className="interactions">
           <Button onClick={() => this.fetchSearchTopStories(searchKey, page + 1)}>
@@ -130,19 +131,28 @@ class App extends Component {
   }
 }
 
-const Search = ({ value, onChange, onSubmit, children }) => {
-  return (
-  <form onSubmit={onSubmit}>
-    {children} <input
-    type="text"
-    value={value}
-    onChange={onChange}
-    />
-    <button type="submit">
-      {children}
-    </button>
-  </form>
-  );
+class Search extends Component {
+  componentDidMount() {
+    if (this.input) {
+      this.input.focus();
+    }
+  }
+  render() {
+    const { value, onChange, onSubmit, children } = this.props;
+    return (
+      <form onSubmit={onSubmit}>
+        {children} <input
+          type="text"
+          value={value}
+          onChange={onChange}
+          ref={el => this.input = el}
+        />
+        <button type="submit">
+          {children}
+        </button>
+      </form>
+    );
+  }
 }
 
 Search.propTypes = {
@@ -165,7 +175,7 @@ const Table = ({ list, onDismiss }) => {
 
   return (
     <div className="table">
-      {list.map( item =>
+      {list.map(item =>
         <div key={item.objectID} className="table-row">
           <span style={largeColumn}>
             <a href={item.url}>{item.title}</a>
@@ -177,7 +187,7 @@ const Table = ({ list, onDismiss }) => {
           <span style={smallColumn}>
             {item.points}</span>
           <span>
-            <Button 
+            <Button
               onClick={() => onDismiss(item.objectID)}
               className="button-inline"
             >
@@ -187,7 +197,7 @@ const Table = ({ list, onDismiss }) => {
         </div>
       )}
     </div>
-  )    
+  )
 }
 
 Table.propTypes = {
@@ -204,7 +214,7 @@ Table.propTypes = {
 }
 
 
-const Button = ({onClick, className, children}) =>
+const Button = ({ onClick, className, children }) =>
   <button
     onClick={onClick}
     className={className}
@@ -212,6 +222,8 @@ const Button = ({onClick, className, children}) =>
   >
     {children}
   </button>
+
+// const withLoading = (component) => (props) => props.isLoading ? <Loading /> : <Component {...props} />
 
 Button.defaultProps = {
   className: '',
