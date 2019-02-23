@@ -1,7 +1,6 @@
 import React, { Component } from "react";
 import PropTypes from "prop-types";
 import axios from "axios";
-import { sortBy } from "lodash";
 import Search from "./components/Search";
 import "./App.css";
 
@@ -13,13 +12,6 @@ const PARAM_SEARCH = "query=";
 const PARAM_PAGE = "page=";
 const PARAM_HPP = "hitsPerPage=";
 
-const SORTS = {
-  NONE: list => list,
-  TITLE: list => sortBy(list, "title"),
-  AUTHOR: list => sortBy(list, "author"),
-  COMMENTS: list => sortBy(list, "num_comments").reverse(),
-  POINTS: list => sortBy(list, "points").reverse()
-};
 
 class App extends Component {
   _isMounted = false;
@@ -31,8 +23,7 @@ class App extends Component {
       searchKey: "",
       searchTerm: DEFAULT_QUERY,
       error: null,
-      isLoading: false,
-      sortKey: 'NONE',
+      isLoading: false
     };
 
     this.needsToSearchTopStories = this.needsToSearchTopStories.bind(this);
@@ -41,7 +32,6 @@ class App extends Component {
     this.onSearchChange = this.onSearchChange.bind(this);
     this.onSearchSubmit = this.onSearchSubmit.bind(this);
     this.onDismiss = this.onDismiss.bind(this);
-    this.onSort = this.onSort.bind(this);
   }
 
   needsToSearchTopStories(searchTerm) {
@@ -108,10 +98,6 @@ class App extends Component {
     this.setState({ searchTerm: event.target.value });
   }
 
-  onSort(sortKey) {
-    this.setState({ sortKey });
-  }
-
   render() {
     const { searchTerm, results, searchKey, error, isLoading } = this.state;
     const page =
@@ -134,8 +120,8 @@ class App extends Component {
             <p>Something went wrong...</p>
           </div>
         ) : (
-            <Table list={list} onDismiss={this.onDismiss} />
-          )}
+          <Table list={list} onDismiss={this.onDismiss} />
+        )}
         <div className="interactions">
           <ButtonWithLoading
             isLoading={isLoading}
@@ -148,6 +134,37 @@ class App extends Component {
     );
   }
 }
+
+class Search extends Component {
+  componentDidMount() {
+    if (this.input) {
+      this.input.focus();
+    }
+  }
+  render() {
+    const { value, onChange, onSubmit, children } = this.props;
+    return (
+      <form onSubmit={onSubmit}>
+        {children} <input
+          type="text"
+          value={value}
+          onChange={onChange}
+          ref={el => this.input = el}
+        />
+        <button type="submit">
+          {children}
+        </button>
+      </form>
+    );
+  }
+}
+
+Search.propTypes = {
+  value: PropTypes.string,
+  onChange: PropTypes.func,
+  onSubmit: PropTypes.func,
+  children: PropTypes.node.isRequired,
+};
 
 const Table = ({ list, onDismiss }) => {
   const largeColumn = {
@@ -162,7 +179,7 @@ const Table = ({ list, onDismiss }) => {
 
   return (
     <div className="table">
-      {list.map(item => (
+      {list.map(item =>
         <div key={item.objectID} className="table-row">
           <span style={largeColumn}>
             <a href={item.url}>{item.title}</a>
@@ -181,8 +198,8 @@ const Table = ({ list, onDismiss }) => {
         </div>
       ))}
     </div>
-  );
-};
+  )
+}
 
 Table.propTypes = {
   list: PropTypes.arrayOf(
@@ -197,11 +214,19 @@ Table.propTypes = {
   onDismiss: PropTypes.func.isRequired
 };
 
-const Button = ({ onClick, className, children }) => (
-  <button onClick={onClick} className={className} type="button">
+const Button = ({ onClick, className, children }) =>
+  <button
+    onClick={onClick}
+    className={className}
+    type="button"
+  >
     {children}
   </button>
 );
+
+const withLoading = (Component) => ({ isLoading, ...rest }) => isLoading ? <Loading /> : <Component {...rest} />
+
+const ButtonWithLoading = withLoading(Button);
 
 Button.defaultProps = {
   className: ""
@@ -213,12 +238,8 @@ Button.propTypes = {
   children: PropTypes.node.isRequired
 };
 
-const Loading = () => <div>Loading...</div>;
+const Loading = () => <div><i class="fa fa-spinner fa-spin"></i></div>
 
-const withLoading = Component => ({ isLoading, ...rest }) =>
-  isLoading ? <Loading /> : <Component {...rest} />;
-
-const ButtonWithLoading = withLoading(Button);
 
 export default App;
 
