@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import axios from 'axios';
 import PropTypes from 'prop-types';
 import { sortBy } from 'lodash';
+import classNames from 'classnames';
 import './App.css';
 
 const DEFAULT_QUERY = 'redux';
@@ -201,7 +202,7 @@ const Table = ({ list, sortKey, onSort, isSortReverse, onDismiss, }) => {
           <Sort
             sortKey={'TITLE'}
             onSort={onSort}
-            activeSortkey={sortKey}
+            activeSortKey={sortKey}
           >
             Title
             </Sort>
@@ -210,7 +211,7 @@ const Table = ({ list, sortKey, onSort, isSortReverse, onDismiss, }) => {
           <Sort
             sortKey={'AUTHOR'}
             onSort={onSort}
-            activeSortkey={sortKey}
+            activeSortKey={sortKey}
           >
             Author
             </Sort>
@@ -219,7 +220,7 @@ const Table = ({ list, sortKey, onSort, isSortReverse, onDismiss, }) => {
           <Sort
             sortKey={'COMMENTS'}
             onSort={onSort}
-            activeSortkey={sortKey}
+            activeSortKey={sortKey}
           >
             Comments
             </Sort>
@@ -228,7 +229,7 @@ const Table = ({ list, sortKey, onSort, isSortReverse, onDismiss, }) => {
           <Sort
             sortKey={'POINTS'}
             onSort={onSort}
-            activeSortkey={sortKey}
+            activeSortKey={sortKey}
           >
             Points
             </Sort>
@@ -275,18 +276,17 @@ Table.propTypes = {
   onDismiss: PropTypes.func.isRequired,
 }
 
-const Sort = ({ sortKey, onSort, activeSortkey, children }) => {
-  const sortClass = ['button-inline'];
-
-  if (sortKey === activeSortkey) {
-    sortClass.push('button-active');
-  }
-
+const Sort = ({ sortKey, onSort, activeSortKey, children }) => {
+  const sortClass = classNames(
+    'button-inline',
+    { 'button-active': sortKey === activeSortKey }
+  );
   return (
     <Button
       onClick={() => onSort(sortKey)}
-      className={sortClass.join(' ')}
+      className={sortClass}
     >
+
       {children}
     </Button>
   );
